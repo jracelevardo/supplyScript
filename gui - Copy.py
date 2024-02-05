@@ -1,6 +1,6 @@
 
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, END
 import supp
 
 class LexerApp:
@@ -57,35 +57,22 @@ class LexerApp:
         try:
             result, error = supp.run_from_code(input_code)
 
+            # Clear existing content
+            self.output_text.config(state=tk.NORMAL)
+            self.output_text.delete("1.0", tk.END)
+
             if error:
                 self.output_text.insert(tk.END, f"Error: {error}\n")
             else:
-                self.display_parsed_tokens(result)
+                for token in result:
+                    self.output_text.insert(tk.END, f"{token}\n")
+
+                self.output_text.insert(tk.END, f"\nOutput saved to: symbol_table.txt\n")
+            
+            self.output_text.config(state=tk.DISABLED)
 
         except Exception as e:
             self.output_text.insert(tk.END, f"An error occurred: {str(e)}\n")
-
-    def display_parsed_tokens(self, tokens):
-        self.output_text.config(state=tk.NORMAL)
-        self.output_text.delete("1.0", tk.END)
-
-        for token in tokens:
-            self.display_token_tree(token)
-
-        self.output_text.config(state=tk.DISABLED)
-
-    def display_token_tree(self, token, level=0):
-        indent = '  ' * level
-        self.output_text.insert(tk.END, f"{indent}{token.type}")
-
-        if token.value:
-            self.output_text.insert(tk.END, f": {token.value}\n")
-        else:
-            self.output_text.insert(tk.END, '\n')
-
-        # Loop through the children of the token
-        for child in token.children:
-            self.display_token_tree(child, level + 1)
 
 
     def select_file(self):
